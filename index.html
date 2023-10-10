@@ -3,10 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/styles.css" />
     <title>Music Maker</title>
     <script src="js/musicMaker.js" defer></script>
   </head>
   <body>
     <h1>Music Maker</h1>
+    <button id="upload">Add sample</button>
+    <input type="file" id="input-sample" name="input-sample" accept="audio/*" />
+    <br />
+    <div id="content">
+      <div id="addButtons"></div>
+      <div id="tracks"></div>
+    </div>
+
+    <button id="addTrack">Add new track</button> <br />
+    <button id="play">Play</button>
   </body>
 </html>
