@@ -4,6 +4,7 @@ const createSample = (sample, sampleCollections) => {
   sampleElement.setAttribute("id", "sample" + id++);
   sampleElement.setAttribute("draggable", true);
   sampleElement.innerText = sample.name;
+  sampleElement.src = sample.src;
   sampleCollections.appendChild(sampleElement);
 
   sampleElement.addEventListener("dragstart", (e) => {
@@ -11,7 +12,7 @@ const createSample = (sample, sampleCollections) => {
   });
 };
 
-const createTrack = (tracksDiv) => {
+const createTrack = (tracksDiv, tracks) => {
   const cloneCounts = {};
   const index = tracksDiv.children.length / 2;
 
@@ -20,6 +21,8 @@ const createTrack = (tracksDiv) => {
 
   trackDiv.setAttribute("id", "trackDiv" + index);
   trackSetupDiv.setAttribute("id", "trackSetupDiv" + index);
+  trackDiv.classList.add("trackDiv");
+  trackSetupDiv.classList.add("setUpDiv");
 
   const trackDivHeader = document.createElement("h3");
   trackDivHeader.innerText = "Track " + (index + 1);
@@ -34,7 +37,6 @@ const createTrack = (tracksDiv) => {
 
   trackDiv.addEventListener("drop", (e) => {
     e.preventDefault();
-
     const sampleId = e.dataTransfer.getData("text");
     const originalSample = document.getElementById(sampleId);
     const clonedSample = originalSample.cloneNode(true);
@@ -44,7 +46,16 @@ const createTrack = (tracksDiv) => {
     const clonedId = `cloned${sampleId}${cloneCounts[sampleId]}`;
     clonedSample.setAttribute("id", clonedId);
     clonedSample.classList.add("dropped");
+
     trackDiv.appendChild(clonedSample);
+
+    const trackIndex = parseInt(trackDiv.getAttribute("id").slice(8));
+
+    if (!tracks[trackIndex]) {
+      tracks[trackIndex] = [];
+    }
+
+    tracks[trackIndex].push({ src: originalSample.src });
   });
 };
 
@@ -66,21 +77,54 @@ const addInitialSamples = () => {
   });
 };
 
-const addInitialTracks = () => {
+const addInitialTracks = (tracks) => {
+  const tracksDiv = document.getElementById("allTracks");
+
+  for (let i = 0; i < tracks.length; i++) {
+    createTrack(tracksDiv, tracks);
+  }
+};
+
+const playSong = (tracks) => {
+  tracks.forEach((track, i) => {
+    if (track.length > 0) {
+      playTrack(track, i);
+    }
+    i++;
+  });
+};
+
+const playTrack = (track) => {
+  let audio = new Audio();
+  let i = 0;
+
+  audio.addEventListener(
+    "ended",
+    () => {
+      i = ++i < track.length ? i : 0;
+      audio.src = track[i].src;
+      audio.play();
+    },
+    true
+  );
+
+  audio.volume = 1.0;
+  audio.loop = false;
+  audio.src = track[0].src;
+  audio.play();
+};
+
+document.addEventListener("DOMContentLoaded", () => {
   const tracks = [];
 
   tracks.push([]);
   tracks.push([]);
-  tracks.push([]);
-  tracks.push([]);
 
-  const tracksDiv = document.getElementById("tracks");
-  const cloneCounts = {};
+  addInitialSamples();
+  addInitialTracks(tracks);
 
-  for (let i = 0; i < tracks.length; i++) {
-    createTrack(tracksDiv, cloneCounts);
-  }
-};
-
-addInitialSamples();
-addInitialTracks();
+  const playButton = document.getElementById("play");
+  playButton.addEventListener("click", () => {
+    playSong(tracks);
+  });
+});

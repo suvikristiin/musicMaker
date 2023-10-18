@@ -31,8 +31,7 @@ h1 {
   text-align: center;
 }
 
-#tracks {
-  margin: 0;
+#allTracks {
   display: grid;
   grid-template-columns: 150px auto;
 }
@@ -49,11 +48,11 @@ h1 {
   margin: 2px;
 }
 
-#tracks > div h3 {
+#allTracks > div h3 {
   color: #000000;
 }
 
-#tracks > div {
+#allTracks > div {
   display: flex;
   background-color: #828282;
   border: 3px solid #c8c8c8;
@@ -62,4 +61,39 @@ h1 {
   height: 75px;
   padding: 5px;
   margin: 10px 0px 10px 0px;
+}
+
+#addTrack {
+  display: grid;
+  grid-column: 2;
+  width: 120px;
+  margin: 10px;
+  background-color: #c8c8c8;
+  border-radius: 5px;
+}
+
+#playSong {
+  position: relative;
+}
+
+#pause {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  bottom: 0px;
+  right: 70px;
+  background-color: #c8c8c8;
+  border: 3px solid #ffa600;
+  font-size: 16px;
+}
+
+#play {
+  position: absolute;
+  right: 0px;
+  bottom: 0px;
+  width: 60px;
+  height: 60px;
+  background-color: #c8c8c8;
+  border: 3px solid #ffa600;
+  font-size: 16px;
 }
