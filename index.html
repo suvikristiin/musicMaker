@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="css/styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+      integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
     <title>Music Maker</title>
     <script src="js/musicMaker.js" defer></script>
   </head>
@@ -12,8 +19,8 @@
     <button id="uploadSample">Add sample</button>
     <input type="file" id="input-sample" name="input-sample" accept="audio/*" />
     <div id="playSong">
-      <button id="pause">Pause</button>
-      <button id="play">Play</button>
+      <i id="pause" class="fa-regular fa-circle-pause fa-2xl"></i>
+      <i id="play" class="fa-regular fa-circle-play fa-2xl"></i>
     </div>
     <div id="songComposer">
       <div id="sampleCollections"></div>
