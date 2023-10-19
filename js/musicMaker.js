@@ -18,9 +18,17 @@ const createTrack = (tracksDiv, tracks) => {
 
   const trackDiv = document.createElement("div");
   const trackSetupDiv = document.createElement("div");
-
+  const trackVolumeSlider = document.createElement("input");
   trackDiv.setAttribute("id", "trackDiv" + index);
   trackSetupDiv.setAttribute("id", "trackSetupDiv" + index);
+
+  trackVolumeSlider.setAttribute("type", "range");
+  trackVolumeSlider.setAttribute("min", "0");
+  trackVolumeSlider.setAttribute("max", "100");
+  trackVolumeSlider.setAttribute("step", "5");
+  trackVolumeSlider.setAttribute("class", "slider");
+  trackVolumeSlider.setAttribute("id", "trackVol" + index);
+
   trackDiv.classList.add("trackDiv");
   trackSetupDiv.classList.add("setUpDiv");
 
@@ -28,6 +36,7 @@ const createTrack = (tracksDiv, tracks) => {
   trackDivHeader.innerText = "Track " + (index + 1);
 
   trackSetupDiv.appendChild(trackDivHeader);
+  trackSetupDiv.appendChild(trackVolumeSlider);
   tracksDiv.appendChild(trackSetupDiv);
   tracksDiv.appendChild(trackDiv);
 
@@ -94,10 +103,12 @@ const playSong = (tracks) => {
   });
 };
 
-const playTrack = (track) => {
+const playTrack = (track, index) => {
   let audio = new Audio();
-  let i = 0;
 
+  const volume = document.getElementById("trackVol" + index);
+
+  let i = 0;
   audio.addEventListener(
     "ended",
     () => {
@@ -108,15 +119,18 @@ const playTrack = (track) => {
     true
   );
 
-  audio.volume = 1.0;
+  audio.volume = volume.value / 100;
   audio.loop = false;
   audio.src = track[0].src;
   audio.play();
+
+  volume.addEventListener("input", () => {
+    audio.volume = volume.value / 100;
+  });
 };
 
 document.addEventListener("DOMContentLoaded", () => {
   const tracks = [];
-
   tracks.push([]);
   tracks.push([]);
 
