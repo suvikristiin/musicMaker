@@ -33,12 +33,33 @@ const createTrack = (tracksDiv, tracks) => {
   trackSetupDiv.classList.add("setUpDiv");
 
   const trackDivHeader = document.createElement("h3");
-  trackDivHeader.innerText = "Track " + (index + 1);
+
+  const updateTrackHeaderText = (tracksDiv) => {
+    const trackSetupDivs = Array.from(
+      tracksDiv.getElementsByClassName("setUpDiv")
+    );
+    trackSetupDivs.forEach((trackSetupDiv, index) => {
+      const trackDivHeader = trackSetupDiv.querySelector("h3");
+      trackDivHeader.innerText = "Track " + (index + 1);
+    });
+  };
 
   trackSetupDiv.appendChild(trackDivHeader);
   trackSetupDiv.appendChild(trackVolumeSlider);
   tracksDiv.appendChild(trackSetupDiv);
   tracksDiv.appendChild(trackDiv);
+  updateTrackHeaderText(tracksDiv);
+
+  const removeTrackButton = document.createElement("button");
+  removeTrackButton.innerText = "X";
+  removeTrackButton.addEventListener("click", () => {
+    tracksDiv.removeChild(trackDiv);
+    tracksDiv.removeChild(trackSetupDiv);
+    tracks.splice(index, 1);
+    console.log(tracks);
+    updateTrackHeaderText(tracksDiv);
+  });
+  trackSetupDiv.appendChild(removeTrackButton);
 
   trackDiv.addEventListener("dragover", (e) => {
     e.preventDefault();
