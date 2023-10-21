@@ -103,6 +103,21 @@ const addInitialSamples = () => {
   samples.push({ src: "audio/strange-beat.mp3", name: "Strange Beat" });
   samples.push({ src: "audio/violin.mp3", name: "Violin" });
 
+  const uploadSampleButton = document.getElementById("uploadSample");
+  uploadSampleButton.addEventListener("click", () => {
+    const file = document.getElementById("input-sample").files[0];
+    let audioSrc = "";
+    if (!file) return;
+    audioSrc = URL.createObjectURL(file);
+    let sampleName = file.name;
+    if (sampleName.length > 15) {
+      sampleName = sampleName.substring(0, 15);
+    }
+    let sample = { src: audioSrc, name: sampleName };
+    samples.push(sample);
+    createSample(sample, sampleCollections);
+  });
+
   const sampleCollections = document.getElementById("sampleCollections");
   let id = 0;
 
@@ -194,5 +209,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const playButton = document.getElementById("play");
   playButton.addEventListener("click", () => {
     playSong(tracks);
+  });
+
+  const addNewTrackButton = document.getElementById("addTrack");
+  addNewTrackButton.addEventListener("click", () => {
+    const tracksDiv = document.getElementById("allTracks");
+    tracks.push([]);
+    createTrack(document.getElementById("allTracks"), tracks);
   });
 });
