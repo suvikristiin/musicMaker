@@ -195,6 +195,16 @@ const playTrack = (track, index) => {
   const pauseButton = document.getElementById("pause");
   pauseButton.addEventListener("click", () => {
     audio.pause();
+    audio.dataset.currentTime = audio.currentTime;
+  });
+
+  const playButton = document.getElementById("play");
+  playButton.addEventListener("click", () => {
+    if (audio.dataset.currentTime) {
+      audio.currentTime = parseFloat(audio.dataset.currentTime);
+      audio.dataset.currentTime = null;
+    }
+    audio.play();
   });
 };
 
