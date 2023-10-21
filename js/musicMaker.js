@@ -177,7 +177,10 @@ const playTrack = (track, index) => {
     });
   }
 
-  console.log(audio.volume);
+  const pauseButton = document.getElementById("pause");
+  pauseButton.addEventListener("click", () => {
+    audio.pause();
+  });
 };
 
 document.addEventListener("DOMContentLoaded", () => {
