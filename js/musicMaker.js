@@ -44,27 +44,52 @@ const createTrack = (tracksDiv, tracks) => {
     e.preventDefault();
   });
 
+  let clonedSampleCount = 0;
+
   trackDiv.addEventListener("drop", (e) => {
     e.preventDefault();
     const sampleId = e.dataTransfer.getData("text");
     const originalSample = document.getElementById(sampleId);
     const clonedSample = originalSample.cloneNode(true);
 
-    cloneCounts[sampleId] = (cloneCounts[sampleId] || 0) + 1;
+    clonedSampleCount++;
 
-    const clonedId = `cloned${sampleId}${cloneCounts[sampleId]}`;
+    cloneCounts[sampleId] = (cloneCounts[sampleId] || 0) + 1;
+    const trackIndex = parseInt(trackDiv.getAttribute("id").slice(8));
+    const clonedId = `cloned${sampleId}${index}${tracks[trackIndex].length}`;
+
+    const instrumentVolSlider = document.createElement("input");
+    instrumentVolSlider.setAttribute("type", "range");
+    instrumentVolSlider.setAttribute("min", "0");
+    instrumentVolSlider.setAttribute("max", "100");
+    instrumentVolSlider.setAttribute("step", "5");
+    instrumentVolSlider.setAttribute("class", "sliderInstrument");
+    instrumentVolSlider.setAttribute("id", "instrumentVol" + clonedId);
+
     clonedSample.setAttribute("id", clonedId);
     clonedSample.classList.add("dropped");
 
+    clonedSample.appendChild(instrumentVolSlider);
     trackDiv.appendChild(clonedSample);
 
-    const trackIndex = parseInt(trackDiv.getAttribute("id").slice(8));
+    const clonedSampleIndex = tracks[trackIndex].length;
 
     if (!tracks[trackIndex]) {
       tracks[trackIndex] = [];
     }
 
-    tracks[trackIndex].push({ src: originalSample.src });
+    tracks[trackIndex].push({
+      src: originalSample.src,
+      volume: instrumentVolSlider.value,
+    });
+
+    instrumentVolSlider.addEventListener("input", () => {
+      tracks[trackIndex][clonedSampleIndex].volume = instrumentVolSlider.value;
+      console.log(tracks);
+    });
+
+    clonedSample.setAttribute("draggable", false);
+    console.log(clonedId);
   });
 };
 
@@ -96,6 +121,7 @@ const addInitialTracks = (tracks) => {
 
 const playSong = (tracks) => {
   tracks.forEach((track, i) => {
+    console.log("track", track);
     if (track.length > 0) {
       playTrack(track, i);
     }
@@ -106,27 +132,52 @@ const playSong = (tracks) => {
 const playTrack = (track, index) => {
   let audio = new Audio();
 
-  const volume = document.getElementById("trackVol" + index);
-
+  const volumeTrack = document.getElementById("trackVol" + index);
   let i = 0;
+
   audio.addEventListener(
     "ended",
     () => {
       i = ++i < track.length ? i : 0;
+
+      const volume = volumeTrack.value / 100 + track[i].volume / 100;
+      audio.volume = volume > 1 ? 1 : volume;
       audio.src = track[i].src;
       audio.play();
     },
     true
   );
 
-  audio.volume = volume.value / 100;
+  const volume = volumeTrack.value / 100 + track[i].volume / 100;
+  audio.volume = volume > 1 ? 1 : volume;
   audio.loop = false;
-  audio.src = track[0].src;
+  audio.src = track[i].src;
   audio.play();
 
-  volume.addEventListener("input", () => {
-    audio.volume = volume.value / 100;
+  volumeTrack.addEventListener("input", () => {
+    const updateVolume = volumeTrack.value / 100 + track[i].volume / 100;
+    audio.volume = updateVolume > 1 ? 1 : updateVolume;
   });
+
+  for (
+    let instrumentIndex = 0;
+    instrumentIndex < track.length;
+    instrumentIndex++
+  ) {
+    const volumePerInstrument = document.querySelectorAll(
+      "[id^='instrumentVol'][id$='" + index + instrumentIndex + "']"
+    );
+    console.log(volumePerInstrument);
+
+    volumePerInstrument[0].addEventListener("input", () => {
+      track[instrumentIndex].volume = volumePerInstrument[0].value;
+      const updateVolume =
+        volumeTrack.value / 100 + track[instrumentIndex].volume / 100;
+      audio.volume = updateVolume > 1 ? 1 : updateVolume;
+    });
+  }
+
+  console.log(audio.volume);
 };
 
 document.addEventListener("DOMContentLoaded", () => {
