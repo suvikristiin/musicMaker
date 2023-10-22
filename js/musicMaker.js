@@ -1,11 +1,21 @@
 const createSample = (sample, sampleCollections) => {
   let id = sampleCollections.children.length;
   const sampleElement = document.createElement("div");
+  const removeSampleButton = document.createElement("button");
   sampleElement.setAttribute("id", "sample" + id++);
   sampleElement.setAttribute("draggable", true);
+
+  removeSampleButton.innerText = "X";
+  removeSampleButton.classList.add("removeSample");
+
   sampleElement.innerText = sample.name;
   sampleElement.src = sample.src;
   sampleCollections.appendChild(sampleElement);
+  sampleElement.appendChild(removeSampleButton);
+
+  removeSampleButton.addEventListener("click", () => {
+    sampleCollections.removeChild(sampleElement)
+  });
 
   sampleElement.addEventListener("dragstart", (e) => {
     e.dataTransfer.setData("text/plain", e.target.id);
@@ -52,14 +62,17 @@ const createTrack = (tracksDiv, tracks) => {
 
   const removeTrackButton = document.createElement("button");
   removeTrackButton.innerText = "X";
+  removeTrackButton.classList.add("removeTrack");
+
   removeTrackButton.addEventListener("click", () => {
     tracksDiv.removeChild(trackDiv);
     tracksDiv.removeChild(trackSetupDiv);
+    tracksDiv.removeChild(removeTrackButton);
     tracks.splice(index, 1);
     console.log(tracks);
     updateTrackHeaderText(tracksDiv);
   });
-  trackSetupDiv.appendChild(removeTrackButton);
+  tracksDiv.appendChild(removeTrackButton);
 
   trackDiv.addEventListener("dragover", (e) => {
     e.preventDefault();

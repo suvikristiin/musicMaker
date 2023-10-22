@@ -10,32 +10,60 @@ h1 {
   color: #ffffff;
 }
 
-#songComposer {
-  display: grid;
-  grid-template-columns: 100px auto;
+#sampleControls {
+  background-color: #828282;
+  border: 3px solid #c8c8c8;
+  border-radius: 10px;
+  box-shadow: 0px 0px 2px 2px #c8c8c8;
+  padding: 10px;
+  width: 50%;
+  margin-bottom: 10px;
 }
 
 #sampleCollections {
-  display: grid;
-  grid-template-columns: auto;
-  margin: 20px;
+  margin: 10px;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 #sampleCollections > div {
   background-color: #ffa600;
   border: 3px solid #c8c8c8;
+  border-radius: 5px;
+  box-shadow: 0px 0px 1px 1px #c8c8c8;
+  display: flex;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 5px;
+  width: 80px;
+  height: 40px;
+  margin: 5px;
+  padding-right: 20px;
+}
+
+.removeSample {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #c8c8c8;
+  color: #828282;
   border-radius: 3px;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  line-height: 1;
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
-  max-width: 95px;
-  max-height: 50px;
+  margin: 2px;
 }
 
 #allTracks {
   display: grid;
-  grid-template-columns: 150px auto;
+  grid-template-columns: 150px auto 50px;
 }
 
 .setUpDiv {
@@ -43,6 +71,17 @@ h1 {
   justify-items: center;
   margin: 0;
   grid-template-rows: 30px auto;
+}
+
+.removeTrack {
+  height: 30px;
+  width: 30px;
+  margin: auto;
+  border: 2px solid #c8c8c8;
+  border-radius: 5px;
+  box-shadow: 0px 0px 2px 2px #c8c8c8;
+  background-color: #828282;
+  color: #c8c8c8;
 }
 
 h3 {
@@ -101,23 +140,22 @@ h3 {
 }
 
 #playSong {
-  position: relative;
+  display: flex;
+  justify-content: flex-end;
 }
 
 #pause {
-  position: absolute;
-  bottom: 40px;
-  right: 90px;
   color: #ffa600;
   font-size: 56px;
+  margin-right: 10px;
+  margin-bottom: 30px;
 }
 
 #play {
-  position: absolute;
-  bottom: 40px;
-  right: 20px;
   color: #ffa600;
   font-size: 56px;
+  margin-right: 60px;
+  margin-bottom: 30px;
 }
 
 input[type="range"] {
