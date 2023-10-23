@@ -97,9 +97,7 @@ const createTrack = (tracksDiv, tracks) => {
     if (!tracks[trackIndex]) {
       tracks[trackIndex] = [];
     }
-    console.log(sampleId);
-    console.log(index);
-    console.log(tracks[trackIndex].length);
+
     const clonedId = `cloned${sampleId}${index}${tracks[trackIndex].length}`;
 
     const instrumentVolSlider = document.createElement("input");
@@ -112,6 +110,10 @@ const createTrack = (tracksDiv, tracks) => {
 
     clonedSample.setAttribute("id", clonedId);
     clonedSample.classList.add("dropped");
+
+    getSampleDuration(originalSample.src).then((duration) => {
+      clonedSample.style.width = (50 + duration * 15).toString() + "px";
+    });
 
     clonedSample.appendChild(instrumentVolSlider);
     trackDiv.appendChild(clonedSample);
@@ -139,6 +141,16 @@ const createTrack = (tracksDiv, tracks) => {
       tracks[trackIndex].splice(clonedSampleIndex, 1);
       console.log(tracks);
     });
+  });
+};
+
+const getSampleDuration = async (src) => {
+  return new Promise((resolve) => {
+    const audio = new Audio();
+    audio.addEventListener("loadedmetadata", () => {
+      resolve(audio.duration);
+    });
+    audio.src = src;
   });
 };
 
