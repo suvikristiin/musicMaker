@@ -14,7 +14,7 @@ const createSample = (sample, sampleCollections) => {
   sampleElement.appendChild(removeSampleButton);
 
   removeSampleButton.addEventListener("click", () => {
-    sampleCollections.removeChild(sampleElement)
+    sampleCollections.removeChild(sampleElement);
   });
 
   sampleElement.addEventListener("dragstart", (e) => {
@@ -23,8 +23,10 @@ const createSample = (sample, sampleCollections) => {
 };
 
 const createTrack = (tracksDiv, tracks) => {
+  console.log(tracks);
+
   const cloneCounts = {};
-  const index = tracksDiv.children.length / 2;
+  const index = tracksDiv.children.length / 3;
 
   const trackDiv = document.createElement("div");
   const trackSetupDiv = document.createElement("div");
@@ -48,6 +50,7 @@ const createTrack = (tracksDiv, tracks) => {
     const trackSetupDivs = Array.from(
       tracksDiv.getElementsByClassName("setUpDiv")
     );
+
     trackSetupDivs.forEach((trackSetupDiv, index) => {
       const trackDivHeader = trackSetupDiv.querySelector("h3");
       trackDivHeader.innerText = "Track " + (index + 1);
@@ -72,6 +75,7 @@ const createTrack = (tracksDiv, tracks) => {
     console.log(tracks);
     updateTrackHeaderText(tracksDiv);
   });
+
   tracksDiv.appendChild(removeTrackButton);
 
   trackDiv.addEventListener("dragover", (e) => {
@@ -90,6 +94,12 @@ const createTrack = (tracksDiv, tracks) => {
 
     cloneCounts[sampleId] = (cloneCounts[sampleId] || 0) + 1;
     const trackIndex = parseInt(trackDiv.getAttribute("id").slice(8));
+    if (!tracks[trackIndex]) {
+      tracks[trackIndex] = [];
+    }
+    console.log(sampleId);
+    console.log(index);
+    console.log(tracks[trackIndex].length);
     const clonedId = `cloned${sampleId}${index}${tracks[trackIndex].length}`;
 
     const instrumentVolSlider = document.createElement("input");
@@ -108,10 +118,6 @@ const createTrack = (tracksDiv, tracks) => {
 
     const clonedSampleIndex = tracks[trackIndex].length;
 
-    if (!tracks[trackIndex]) {
-      tracks[trackIndex] = [];
-    }
-
     tracks[trackIndex].push({
       src: originalSample.src,
       volume: instrumentVolSlider.value,
@@ -123,7 +129,16 @@ const createTrack = (tracksDiv, tracks) => {
     });
 
     clonedSample.setAttribute("draggable", false);
-    console.log(clonedId);
+    console.log("clonedId", clonedId);
+
+    const removeClonedSampleButton =
+      clonedSample.querySelector(".removeSample");
+    console.log(removeClonedSampleButton);
+    removeClonedSampleButton.addEventListener("click", () => {
+      trackDiv.removeChild(clonedSample);
+      tracks[trackIndex].splice(clonedSampleIndex, 1);
+      console.log(tracks);
+    });
   });
 };
 
@@ -183,10 +198,14 @@ const playTrack = (track, index) => {
 
   const volumeTrack = document.getElementById("trackVol" + index);
   let i = 0;
-
+  track[i];
   audio.addEventListener(
     "ended",
     () => {
+      if (!track[i] || !track[i].volume) {
+        console.log(track[i]);
+        return;
+      }
       i = ++i < track.length ? i : 0;
 
       const volume = volumeTrack.value / 100 + track[i].volume / 100;

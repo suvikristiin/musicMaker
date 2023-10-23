@@ -50,6 +50,7 @@ h1 {
   background-color: #c8c8c8;
   color: #828282;
   border-radius: 3px;
+  border: 2px solid #828282;
   width: 20px;
   height: 20px;
   font-size: 12px;
@@ -98,9 +99,7 @@ h3 {
 }
 
 .sliderInstrument {
-  transform: rotate(-90deg);
-  width: 55px;
-  height: 25px;
+  width: 90%;
 }
 
 .dropped {
@@ -110,10 +109,12 @@ h3 {
   padding: 5px;
   margin: 2px;
   display: grid;
-  grid-template-columns: auto 35px;
+  grid-template-rows: auto 20px;
   position: relative;
   text-align: center;
   align-items: center;
+  justify-items: center;
+  padding-right: 15px;
 }
 
 #allTracks > div {
