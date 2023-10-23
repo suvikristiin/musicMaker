@@ -114,7 +114,11 @@ h3 {
   text-align: center;
   align-items: center;
   justify-items: center;
-  padding-right: 15px;
+  padding-right: 17px;
+}
+
+.dropped #text {
+  padding-top: 10px;
 }
 
 #allTracks > div {
