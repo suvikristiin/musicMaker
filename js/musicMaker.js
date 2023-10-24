@@ -22,11 +22,18 @@ const createSample = (sample, sampleCollections) => {
   });
 };
 
+const createTrackAudioElement = (index) => {
+  const audio = new Audio();
+  trackAudioElements[index] = audio;
+  console.log("tracksAudios", trackAudioElements);
+};
+
 const createTrack = (tracksDiv, tracks) => {
   console.log(tracks);
 
   const cloneCounts = {};
   const index = tracksDiv.children.length / 3;
+  createTrackAudioElement(index);
 
   const trackDiv = document.createElement("div");
   const trackSetupDiv = document.createElement("div");
@@ -90,6 +97,11 @@ const createTrack = (tracksDiv, tracks) => {
     const originalSample = document.getElementById(sampleId);
     const clonedSample = originalSample.cloneNode(true);
 
+    sampleAudioElements.push([]);
+    const audio = new Audio();
+    audio.src = originalSample.src;
+    sampleAudioElements[index].push(audio);
+
     clonedSampleCount++;
 
     cloneCounts[sampleId] = (cloneCounts[sampleId] || 0) + 1;
@@ -118,7 +130,8 @@ const createTrack = (tracksDiv, tracks) => {
     clonedSample.appendChild(instrumentVolSlider);
     trackDiv.appendChild(clonedSample);
 
-    const clonedSampleIndex = tracks[trackIndex].length;
+    let clonedSampleIndex = tracks[trackIndex].length;
+    clonedSample.setAttribute("data-cloned-sample-index", clonedSampleIndex);
 
     tracks[trackIndex].push({
       src: originalSample.src,
@@ -135,22 +148,44 @@ const createTrack = (tracksDiv, tracks) => {
 
     const removeClonedSampleButton =
       clonedSample.querySelector(".removeSample");
-    console.log(removeClonedSampleButton);
+
     removeClonedSampleButton.addEventListener("click", () => {
+      const removeSampleIndex = clonedSample.getAttribute(
+        "data-cloned-sample-index"
+      );
+      console.log(clonedSampleIndex);
+      console.log(clonedSample);
       trackDiv.removeChild(clonedSample);
-      tracks[trackIndex].splice(clonedSampleIndex, 1);
-      console.log(tracks);
+      tracks[trackIndex][clonedSampleIndex] = {};
+
+      const clonedSamples = trackDiv.querySelectorAll(".dropped");
+
+      clonedSamples.forEach((clonedSample, i) => {
+        const currentDataIndex = parseInt(
+          clonedSample.getAttribute("data-cloned-sample-index")
+        );
+
+        console.log(currentDataIndex);
+
+        if (currentDataIndex >= removeSampleIndex) {
+          clonedSample.setAttribute(
+            "data-cloned-sample-index",
+            currentDataIndex - 1
+          );
+        }
+      });
     });
   });
 };
 
 const getSampleDuration = async (src) => {
   return new Promise((resolve) => {
-    const audio = new Audio();
-    audio.addEventListener("loadedmetadata", () => {
-      resolve(audio.duration);
+    const audioSample = new Audio();
+    audioSample.addEventListener("loadedmetadata", () => {
+      resolve(audioSample.duration);
     });
-    audio.src = src;
+    audioSample.src = src;
+    audioSample.remove();
   });
 };
 
@@ -197,7 +232,7 @@ const addInitialTracks = (tracks) => {
 
 const playSong = (tracks) => {
   tracks.forEach((track, i) => {
-    console.log("track", track);
+    console.log("track play", track);
     if (track.length > 0) {
       playTrack(track, i);
     }
@@ -206,33 +241,76 @@ const playSong = (tracks) => {
 };
 
 const playTrack = (track, index) => {
-  let audio = new Audio();
+  const audio = trackAudioElements[index];
 
   const volumeTrack = document.getElementById("trackVol" + index);
+
   let i = 0;
-  track[i];
-  audio.addEventListener(
-    "ended",
-    () => {
-      if (!track[i] || !track[i].volume) {
-        console.log(track[i]);
-        return;
-      }
+  let isPaused = false;
+
+  let checkTrackInterval;
+
+  const playNextTrack = () => {
+    let emptyTrack = true;
+
+    while (true) {
       i = ++i < track.length ? i : 0;
 
-      const volume = volumeTrack.value / 100 + track[i].volume / 100;
-      audio.volume = volume > 1 ? 1 : volume;
-      audio.src = track[i].src;
+      if (track[i] && track[i].src) {
+        emptyTrack = false;
+        break;
+      }
+
+      if (i == 0 && emptyTrack) {
+        console.log("Kaikki kappaleet soitettu");
+        audio.remove();
+        initialIsPaused = true;
+        clearInterval(checkTrackInterval);
+        playButton.style.visibility = "hidden";
+        pauseButton.style.visibility = "hidden";
+        reset.addEventListener("click", () => {
+          location.reload();
+        });
+        return;
+      }
+      console.log("loop", i);
+      console.log(emptyTrack);
+    }
+
+    console.log(i);
+
+    console.log(track.length);
+
+    const volume = volumeTrack.value / 100 + track[i].volume / 100;
+    audio.volume = volume > 1 ? 1 : volume;
+
+    audio.src = track[i].src;
+
+    audio.addEventListener("loadedmetadata", () => {
       audio.play();
-    },
-    true
-  );
+    });
+  };
+
+  audio.addEventListener("ended", playNextTrack, true);
 
   const volume = volumeTrack.value / 100 + track[i].volume / 100;
   audio.volume = volume > 1 ? 1 : volume;
   audio.loop = false;
   audio.src = track[i].src;
-  audio.play();
+
+  audio.addEventListener("loadedmetadata", () => {
+    audio.play();
+  });
+
+  checkTrackInterval = setInterval(() => {
+    if (!track[i] || !track[i].src) {
+      if (audio) {
+        audio.pause();
+      }
+      console.log("next");
+      playNextTrack();
+    }
+  }, 100);
 
   volumeTrack.addEventListener("input", () => {
     const updateVolume = volumeTrack.value / 100 + track[i].volume / 100;
@@ -249,47 +327,86 @@ const playTrack = (track, index) => {
     );
     console.log(volumePerInstrument);
 
-    volumePerInstrument[0].addEventListener("input", () => {
-      track[instrumentIndex].volume = volumePerInstrument[0].value;
-      const updateVolume =
-        volumeTrack.value / 100 + track[instrumentIndex].volume / 100;
-      audio.volume = updateVolume > 1 ? 1 : updateVolume;
-    });
+    if (volumePerInstrument.length > 0) {
+      volumePerInstrument[0].addEventListener("input", () => {
+        track[instrumentIndex].volume = volumePerInstrument[0].value;
+        const updateVolume =
+          volumeTrack.value / 100 + track[instrumentIndex].volume / 100;
+        audio.volume = updateVolume > 1 ? 1 : updateVolume;
+      });
+    }
   }
+
+  const playButton = document.getElementById("play");
+
+  playButton.addEventListener("click", () => {
+    if (isPaused) {
+      if (audio.dataset.currentTime !== 0) {
+        audio.currentTime = parseFloat(audio.dataset.currentTime);
+        console.log(audio.currentTime);
+      }
+      audio.play();
+      playButton.removeEventListener("click", null);
+    }
+  });
+
+  const playButtonClickHandler = () => {
+    if (isPaused) {
+      if (audio.dataset.currentTime !== 0) {
+        audio.currentTime = parseFloat(audio.dataset.currentTime);
+        console.log(audio.currentTime);
+        isPaused = false;
+      }
+      audio.play();
+      playButton.removeEventListener("click", playButtonClickHandler);
+    }
+  };
+
+  playButton.addEventListener("click", playButtonClickHandler);
 
   const pauseButton = document.getElementById("pause");
   pauseButton.addEventListener("click", () => {
     audio.pause();
+    isPaused = true;
     audio.dataset.currentTime = audio.currentTime;
-  });
+    console.log(audio.currentTime);
 
-  const playButton = document.getElementById("play");
-  playButton.addEventListener("click", () => {
-    if (audio.dataset.currentTime) {
-      audio.currentTime = parseFloat(audio.dataset.currentTime);
-      audio.dataset.currentTime = null;
-    }
-    audio.play();
+    playButton.addEventListener("click", playButtonClickHandler);
   });
 };
 
-document.addEventListener("DOMContentLoaded", () => {
-  const tracks = [];
-  tracks.push([]);
-  tracks.push([]);
+const tracks = [];
+tracks.push([]);
+tracks.push([]);
+let trackAudioElements = [];
+const removeClonedSampleButtons = [];
+const sampleAudioElements = [];
 
-  addInitialSamples();
-  addInitialTracks(tracks);
+let initialIsPaused = true;
 
-  const playButton = document.getElementById("play");
-  playButton.addEventListener("click", () => {
+addInitialSamples();
+addInitialTracks(tracks);
+
+const playButton = document.getElementById("play");
+
+if (initialIsPaused) {
+  playButtonClickHandler = () => {
     playSong(tracks);
-  });
+    initialIsPaused = false;
+    playButton.removeEventListener("click", playButtonClickHandler);
+  };
 
-  const addNewTrackButton = document.getElementById("addTrack");
-  addNewTrackButton.addEventListener("click", () => {
-    const tracksDiv = document.getElementById("allTracks");
-    tracks.push([]);
-    createTrack(document.getElementById("allTracks"), tracks);
-  });
+  playButton.addEventListener("click", playButtonClickHandler);
+}
+
+const addNewTrackButton = document.getElementById("addTrack");
+addNewTrackButton.addEventListener("click", () => {
+  const tracksDiv = document.getElementById("allTracks");
+  tracks.push([]);
+  createTrack(document.getElementById("allTracks"), tracks);
+});
+
+const reset = document.getElementById("reset");
+reset.addEventListener("click", () => {
+  location.reload();
 });
