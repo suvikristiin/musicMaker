@@ -75,24 +75,24 @@ select {
 }
 
 #sampleCollections > #categoriesDiv {
-  height: 220px;
+  height: 240px;
   width: 150px;
   display: block;
   background-color: #c8c8c8;
   margin: 5px;
   padding: 5px;
+  border-radius: 5px;
 }
 
 #categoriesDiv span {
   display: block;
-  padding: 5px 10px; 
+  padding: 5px 10px;
   cursor: pointer;
 }
 
 #categoriesDiv .selected-category {
   background-color: #828282;
 }
-
 
 #categoriesDiv h3 {
   color: #1b1b1b;

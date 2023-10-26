@@ -545,7 +545,8 @@ const changeSampleCategory = (sampleElement) => {
 
   const categoryDiv = document.createElement("div");
   const changeCategory = document.createElement("h3");
-  changeCategory.innerHTML = "Change category";
+  console.log(sampleElement.textContent);
+  changeCategory.innerHTML = "Change category: " + sampleElement.innerHTML;
   categoryDiv.appendChild(changeCategory);
   const sampleControls = document.getElementById("sampleCollections");
   categoryDiv.setAttribute("id", "categoriesDiv");
@@ -557,6 +558,8 @@ const changeSampleCategory = (sampleElement) => {
     categoryOption.style.marginRight = "10px";
 
     categoryOption.addEventListener("click", () => {
+      const allCategories = categoryDiv.querySelectorAll("span");
+      allCategories.forEach(category => category.classList.remove("selected-category"));
       categoryOption.classList.add("selected-category");
     });
 
@@ -575,16 +578,16 @@ const changeSampleCategory = (sampleElement) => {
     const selectedCategory = categoryDiv.querySelector(".selected-category");
     if (selectedCategory) {
       sampleElement.setAttribute("data-category", selectedCategory.innerText);
-      filterSamplesByCategory(selectedCategory.innerText); 
+      filterSamplesByCategory(selectedCategory.innerText);
     }
-    categoryDiv.remove(); 
+    categoryDiv.remove();
   });
 
   const deleteButton = document.createElement("button");
-  deleteButton.innerText = "X"; 
+  deleteButton.innerText = "X";
 
   deleteButton.addEventListener("click", () => {
-    categoryDiv.remove(); 
+    categoryDiv.remove();
   });
 
   categoryDiv.appendChild(changeButton);
