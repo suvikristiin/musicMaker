@@ -4,6 +4,8 @@ const createSample = (sample, sampleCollections) => {
   const removeSampleButton = document.createElement("button");
   sampleElement.setAttribute("id", "sample" + id++);
   sampleElement.setAttribute("draggable", true);
+  sampleElement.setAttribute("data-category", sample.category);
+  sampleElement.classList.add("sampleElement");
 
   removeSampleButton.innerText = "X";
   removeSampleButton.classList.add("removeSample");
@@ -222,15 +224,70 @@ const getSampleDuration = async (src) => {
   });
 };
 
+const filterSamplesByCategory = (category) => {
+  const samples = document.querySelectorAll(".sampleElement");
+  console.log(samples);
+  samples.forEach((sample) => {
+    console.log(sample.dataset.category);
+    if (sample.dataset.category !== category && category !== "All") {
+      sample.style.display = "none";
+    } else {
+      sample.style.display = "block";
+    }
+  });
+};
+
+const addSampleFilterDropdown = () => {
+  const categories = [
+    "Bass",
+    "Drum",
+    "Piano",
+    "Other",
+    "Classical",
+    "Input files",
+  ];
+  const dropdown = document.createElement("select");
+  const allOption = document.createElement("option");
+  allOption.innerText = "All";
+  allOption.value = "All";
+  dropdown.appendChild(allOption);
+
+  categories.forEach((category) => {
+    const option = document.createElement("option");
+    option.innerText = category;
+    option.value = category;
+    dropdown.appendChild(option);
+  });
+
+  dropdown.addEventListener("change", (e) => {
+    filterSamplesByCategory(e.target.value);
+  });
+
+  const sampleControls = document.getElementById("sampleControls");
+  sampleControls.insertBefore(dropdown, sampleControls.lastElementChild);
+};
+
 const addInitialSamples = () => {
   const samples = [];
 
-  samples.push({ src: "audio/bass.mp3", name: "Bass" });
-  samples.push({ src: "audio/drum.mp3", name: "Drum" });
-  samples.push({ src: "audio/piano.mp3", name: "Piano" });
-  samples.push({ src: "audio/silence.mp3", name: "Silence" });
-  samples.push({ src: "audio/strange-beat.mp3", name: "Strange Beat" });
-  samples.push({ src: "audio/violin.mp3", name: "Violin" });
+  samples.push({ src: "audio/bass.mp3", name: "Bass", category: "Bass" });
+  samples.push({ src: "audio/drum.mp3", name: "Drum", category: "Drum" });
+  samples.push({ src: "audio/piano.mp3", name: "Piano", category: "Piano" });
+  samples.push({
+    src: "audio/silence.mp3",
+    name: "Silence",
+    category: "Other",
+  });
+  samples.push({
+    src: "audio/strange-beat.mp3",
+    name: "Strange Beat",
+    category: "Other",
+  });
+  samples.push({
+    src: "audio/violin.mp3",
+    name: "Violin",
+    category: "Classical",
+  });
 
   const uploadSampleButton = document.getElementById("uploadSample");
   uploadSampleButton.addEventListener("click", () => {
@@ -242,7 +299,7 @@ const addInitialSamples = () => {
     if (sampleName.length > 15) {
       sampleName = sampleName.substring(0, 15);
     }
-    let sample = { src: audioSrc, name: sampleName };
+    let sample = { src: audioSrc, name: sampleName, category: "Input files" };
     samples.push(sample);
     createSample(sample, sampleCollections);
   });
@@ -253,6 +310,8 @@ const addInitialSamples = () => {
   samples.forEach((sample) => {
     createSample(sample, sampleCollections);
   });
+
+  addSampleFilterDropdown();
 };
 
 const addInitialTracks = (tracks) => {
@@ -282,8 +341,6 @@ const playTrack = (track, index) => {
 
   const loopCheckbox = document.getElementById("loopCheckbox" + index);
 
-  console.log("mo", loopCheckbox);
-  // Tarkistetaan onko checkbox valittu
   const shouldLoop = loopCheckbox.checked;
   console.log(shouldLoop);
 
