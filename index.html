@@ -11,8 +11,10 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
+    <link rel="icon" href="data:image/x-icon;base64," type="image/x-icon" />
     <title>Music Maker</title>
-    <script src="js/musicMaker.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.0/lame.min.js"></script>
+    <script src="./js/musicMaker.js" defer></script>
   </head>
   <body>
     <h1>Music Maker</h1>
@@ -28,12 +30,16 @@
         <div id="sampleCollections"></div>
       </div>
       <div id="playSong">
+        <i id="download" class="fa-regular fa-circle-down fa-2xl"></i>
         <i id="reset" class="fa-regular fa-circle-xmark fa-2xl"></i>
         <i id="pause" class="fa-regular fa-circle-pause fa-2xl"></i>
         <i id="play" class="fa-regular fa-circle-play fa-2xl"></i>
       </div>
       <div id="allTracks"></div>
       <button id="addTrack">Add new track</button> <br />
+      <div id="downloadedFiles">
+        <h3>Downloaded Files</h3>
+      </div>
     </div>
   </body>
 </html>
