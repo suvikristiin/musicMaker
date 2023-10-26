@@ -30,6 +30,9 @@ h1 {
   min-height: 75px;
   margin-top: 30px;
 }
+.checkboxLabel {
+  color: #c8c8c8;
+}
 
 #downloadedFiles > a {
   display: block;

@@ -48,8 +48,17 @@ const createTrack = (tracksDiv, tracks) => {
   trackVolumeSlider.setAttribute("class", "slider");
   trackVolumeSlider.setAttribute("id", "trackVol" + index);
 
+  const loopCheckbox = document.createElement("input");
+  loopCheckbox.setAttribute("type", "checkbox");
+  loopCheckbox.setAttribute("id", "loopCheckbox" + index);
+
+  const loopLabel = document.createElement("label");
+  loopLabel.innerText = "Loop";
+  const loopControlDiv = document.createElement("div");
+
   trackDiv.classList.add("trackDiv");
   trackSetupDiv.classList.add("setUpDiv");
+  loopLabel.classList.add("checkboxLabel");
 
   const trackDivHeader = document.createElement("h3");
 
@@ -69,6 +78,10 @@ const createTrack = (tracksDiv, tracks) => {
   tracksDiv.appendChild(trackSetupDiv);
   tracksDiv.appendChild(trackDiv);
   updateTrackHeaderText(tracksDiv);
+
+  loopControlDiv.appendChild(loopLabel);
+  loopControlDiv.appendChild(loopCheckbox);
+  trackSetupDiv.appendChild(loopControlDiv);
 
   const removeTrackButton = document.createElement("button");
   removeTrackButton.innerText = "X";
@@ -98,10 +111,8 @@ const createTrack = (tracksDiv, tracks) => {
     const originalSample = document.getElementById(sampleId);
     const clonedSample = originalSample.cloneNode(true);
 
-    sampleAudioElements.push([]);
     const audio = new Audio();
     audio.src = originalSample.src;
-    sampleAudioElements[index].push(audio);
 
     const downloadButton = document.getElementById("download");
     downloadButton.style.visibility = "visible";
@@ -140,6 +151,8 @@ const createTrack = (tracksDiv, tracks) => {
       src: originalSample.src,
       volume: instrumentVolSlider.value,
     });
+
+    console.log("tracks", tracks);
 
     instrumentVolSlider.addEventListener("input", () => {
       tracks[trackIndex][clonedSampleIndex].volume = instrumentVolSlider.value;
@@ -267,6 +280,13 @@ const playTrack = (track, index) => {
 
   const downloadButton = document.getElementById("download");
 
+  const loopCheckbox = document.getElementById("loopCheckbox" + index);
+
+  console.log("mo", loopCheckbox);
+  // Tarkistetaan onko checkbox valittu
+  const shouldLoop = loopCheckbox.checked;
+  console.log(shouldLoop);
+
   let i = 0;
   let isPaused = false;
 
@@ -277,6 +297,20 @@ const playTrack = (track, index) => {
 
     while (true) {
       i = ++i < track.length ? i : 0;
+
+      if (i == 0 && !shouldLoop) {
+        console.log("moi");
+        audio.remove();
+        initialIsPaused = true;
+        clearInterval(checkTrackInterval);
+        playButton.style.visibility = "hidden";
+        pauseButton.style.visibility = "hidden";
+        downloadButton.style.visibility = "hidden";
+        reset.addEventListener("click", () => {
+          location.reload();
+        });
+        return;
+      }
 
       if (track[i] && track[i].src) {
         emptyTrack = false;
@@ -296,8 +330,8 @@ const playTrack = (track, index) => {
         });
         return;
       }
+
       console.log("loop", i);
-      console.log(emptyTrack);
     }
 
     console.log(i);
@@ -314,11 +348,10 @@ const playTrack = (track, index) => {
     });
   };
 
-  audio.addEventListener("ended", playNextTrack, true);
+  audio.addEventListener("ended", playNextTrack, shouldLoop);
 
   const volume = volumeTrack.value / 100 + track[i].volume / 100;
   audio.volume = volume > 1 ? 1 : volume;
-  audio.loop = false;
   audio.src = track[i].src;
 
   audio.addEventListener("loadedmetadata", () => {
@@ -403,7 +436,6 @@ tracks.push([]);
 tracks.push([]);
 let trackAudioElements = [];
 const removeClonedSampleButtons = [];
-const sampleAudioElements = [];
 
 let initialIsPaused = true;
 
