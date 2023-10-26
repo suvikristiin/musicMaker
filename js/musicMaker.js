@@ -225,6 +225,16 @@ const getSampleDuration = async (src) => {
 };
 
 const filterSamplesByCategory = (category) => {
+  const dropdown = document.getElementById("select");
+
+  dropdown.forEach((option) => {
+    if (option.value === category) {
+      option.selected = true;
+    } else {
+      option.selected = false;
+    }
+  });
+
   const samples = document.querySelectorAll(".sampleElement");
   console.log(samples);
   samples.forEach((sample) => {
@@ -521,6 +531,75 @@ addNewTrackButton.addEventListener("click", () => {
 const reset = document.getElementById("reset");
 reset.addEventListener("click", () => {
   location.reload();
+});
+
+const changeSampleCategory = (sampleElement) => {
+  const categories = [
+    "Bass",
+    "Drum",
+    "Piano",
+    "Other",
+    "Classical",
+    "Input files",
+  ];
+
+  const categoryDiv = document.createElement("div");
+  const changeCategory = document.createElement("h3");
+  changeCategory.innerHTML = "Change category";
+  categoryDiv.appendChild(changeCategory);
+  const sampleControls = document.getElementById("sampleCollections");
+  categoryDiv.setAttribute("id", "categoriesDiv");
+  sampleControls.appendChild(categoryDiv);
+  categories.forEach((category) => {
+    const categoryOption = document.createElement("span");
+    categoryOption.innerText = category;
+    categoryOption.style.cursor = "pointer";
+    categoryOption.style.marginRight = "10px";
+
+    categoryOption.addEventListener("click", () => {
+      categoryOption.classList.add("selected-category");
+    });
+
+    categoryOption.addEventListener("dblclick", () => {
+      sampleElement.setAttribute("data-category", category);
+      categoryDiv.remove(); // poistaa kategoriavaihtoehdot
+    });
+
+    categoryDiv.appendChild(categoryOption);
+  });
+
+  const changeButton = document.createElement("button");
+  changeButton.innerText = "Change";
+
+  changeButton.addEventListener("click", () => {
+    const selectedCategory = categoryDiv.querySelector(".selected-category");
+    if (selectedCategory) {
+      sampleElement.setAttribute("data-category", selectedCategory.innerText);
+      filterSamplesByCategory(selectedCategory.innerText); 
+    }
+    categoryDiv.remove(); 
+  });
+
+  const deleteButton = document.createElement("button");
+  deleteButton.innerText = "X"; 
+
+  deleteButton.addEventListener("click", () => {
+    categoryDiv.remove(); 
+  });
+
+  categoryDiv.appendChild(changeButton);
+  categoryDiv.appendChild(deleteButton);
+};
+
+const sampleCollections = document.getElementById("sampleCollections");
+
+const sampleElements = sampleCollections.querySelectorAll(".sampleElement");
+sampleElements.forEach((sample) => {
+  sample.addEventListener("click", (e) => {
+    if (e.target === sample) {
+      changeSampleCategory(sample);
+    }
+  });
 });
 
 const createAudioBuffer = async (src, audioContext) => {

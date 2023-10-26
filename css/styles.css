@@ -57,7 +57,7 @@ select {
   flex-wrap: wrap;
 }
 
-#sampleCollections > div {
+#sampleCollections > .sampleElement {
   background-color: #ffa600;
   border: 3px solid #1b1b1b;
   border-radius: 5px;
@@ -72,6 +72,30 @@ select {
   height: 40px;
   margin: 5px;
   padding-right: 20px;
+}
+
+#sampleCollections > #categoriesDiv {
+  height: 220px;
+  width: 150px;
+  display: block;
+  background-color: #c8c8c8;
+  margin: 5px;
+  padding: 5px;
+}
+
+#categoriesDiv span {
+  display: block;
+  padding: 5px 10px; 
+  cursor: pointer;
+}
+
+#categoriesDiv .selected-category {
+  background-color: #828282;
+}
+
+
+#categoriesDiv h3 {
+  color: #1b1b1b;
 }
 
 .removeSample {
