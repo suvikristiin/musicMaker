@@ -93,6 +93,7 @@ const createTrack = (tracksDiv, tracks) => {
 
   trackDiv.addEventListener("drop", (e) => {
     e.preventDefault();
+
     const sampleId = e.dataTransfer.getData("text");
     const originalSample = document.getElementById(sampleId);
     const clonedSample = originalSample.cloneNode(true);
@@ -102,6 +103,8 @@ const createTrack = (tracksDiv, tracks) => {
     audio.src = originalSample.src;
     sampleAudioElements[index].push(audio);
 
+    const downloadButton = document.getElementById("download");
+    downloadButton.style.visibility = "visible";
     clonedSampleCount++;
 
     cloneCounts[sampleId] = (cloneCounts[sampleId] || 0) + 1;
@@ -174,6 +177,23 @@ const createTrack = (tracksDiv, tracks) => {
           );
         }
       });
+
+      clonedSampleCount--;
+      console.log(clonedSampleCount);
+
+      const noClonedSamplesLeft = tracks.every((track) =>
+        track.every((sample) => Object.keys(sample).length === 0)
+      );
+      console.log(noClonedSamplesLeft);
+
+      if (noClonedSamplesLeft) {
+        downloadButton.style.visibility = "hidden";
+        tracks.forEach((track) => {
+          track.length = 0;
+        });
+      }
+
+      console.log(tracks);
     });
   });
 };
@@ -245,6 +265,8 @@ const playTrack = (track, index) => {
 
   const volumeTrack = document.getElementById("trackVol" + index);
 
+  const downloadButton = document.getElementById("download");
+
   let i = 0;
   let isPaused = false;
 
@@ -268,6 +290,7 @@ const playTrack = (track, index) => {
         clearInterval(checkTrackInterval);
         playButton.style.visibility = "hidden";
         pauseButton.style.visibility = "hidden";
+        downloadButton.style.visibility = "hidden";
         reset.addEventListener("click", () => {
           location.reload();
         });
@@ -409,4 +432,122 @@ addNewTrackButton.addEventListener("click", () => {
 const reset = document.getElementById("reset");
 reset.addEventListener("click", () => {
   location.reload();
+});
+
+const createAudioBuffer = async (src, audioContext) => {
+  const response = await fetch(src);
+
+  const arrayBuffer = await response.arrayBuffer();
+  console.log(arrayBuffer);
+  return await audioContext.decodeAudioData(arrayBuffer);
+};
+
+const combineTracks = async (audioContext) => {
+  const trackBuffers = [];
+
+  for (const track of tracks) {
+    let trackBuffer = audioContext.createBuffer(2, 1, audioContext.sampleRate);
+
+    for (const instrument of track) {
+      if (instrument.src) {
+        const instrumentBuffer = await createAudioBuffer(
+          instrument.src,
+          audioContext
+        );
+
+        if (instrumentBuffer.length > trackBuffer.length) {
+          const newBuffer = audioContext.createBuffer(
+            2,
+            instrumentBuffer.length,
+            audioContext.sampleRate
+          );
+          newBuffer.copyToChannel(trackBuffer.getChannelData(0), 0);
+          newBuffer.copyToChannel(trackBuffer.getChannelData(1), 1);
+          trackBuffer = newBuffer;
+        }
+
+        const leftInstrumentData = instrumentBuffer.getChannelData(0);
+        const rightInstrumentData = instrumentBuffer.getChannelData(1);
+        const leftTrackData = trackBuffer.getChannelData(0);
+        const rightTrackData = trackBuffer.getChannelData(1);
+
+        for (let i = 0; i < instrumentBuffer.length; i++) {
+          leftTrackData[i] += leftInstrumentData[i];
+          rightTrackData[i] += rightInstrumentData[i];
+        }
+      }
+    }
+    trackBuffers.push(trackBuffer);
+  }
+
+  const maxLength = Math.max(...trackBuffers.map((buffer) => buffer.length));
+  const combinedBuffer = audioContext.createBuffer(
+    2,
+    maxLength,
+    audioContext.sampleRate
+  );
+
+  for (let i = 0; i < trackBuffers.length; i++) {
+    const trackBuffer = trackBuffers[i];
+    const leftTrackData = trackBuffer.getChannelData(0);
+    const rightTrackData = trackBuffer.getChannelData(1);
+    const combinedLeftData = combinedBuffer.getChannelData(0);
+    const combinedRightData = combinedBuffer.getChannelData(1);
+
+    for (let j = 0; j < maxLength; j++) {
+      combinedLeftData[j] =
+        (combinedLeftData[j] || 0) + (leftTrackData[j] || 0);
+      combinedRightData[j] =
+        (combinedRightData[j] || 0) + (rightTrackData[j] || 0);
+    }
+  }
+
+  return combinedBuffer;
+};
+
+const downloadButton = document.getElementById("download");
+
+downloadButton.addEventListener("click", async () => {
+  const audioContext = new AudioContext();
+
+  const combinedBuffer = await combineTracks(audioContext);
+  const leftAudioData = combinedBuffer.getChannelData(0);
+  const rightAudioData = combinedBuffer.getChannelData(1);
+  const mp3DataLeft = new Int16Array(leftAudioData.length);
+  const mp3DataRight = new Int16Array(rightAudioData.length);
+
+  for (let i = 0; i < leftAudioData.length; i++) {
+    mp3DataLeft[i] = leftAudioData[i] * 32767;
+  }
+
+  for (let i = 0; i < rightAudioData.length; i++) {
+    mp3DataRight[i] = rightAudioData[i] * 32767;
+  }
+
+  const mp3encoder = new lamejs.Mp3Encoder(2, combinedBuffer.sampleRate, 128);
+  const mp3Buffer = [];
+
+  for (let i = 0; i < mp3DataLeft.length; i += 1152) {
+    const mp3block = mp3encoder.encodeBuffer(
+      mp3DataLeft.subarray(i, i + 1152),
+      mp3DataRight.subarray(i, i + 1152)
+    );
+    if (mp3block.length > 0) {
+      mp3Buffer.push(mp3block);
+    }
+  }
+
+  const mp3DataBlob = new Blob(mp3Buffer, { type: "audio/mp3" });
+
+  const downloadLink = document.createElement("a");
+  downloadLink.href = URL.createObjectURL(mp3DataBlob);
+  downloadLink.download = "song.mp3";
+  downloadLink.innerHTML = "song.mp3";
+
+  const downloadedFiles = document.getElementById("downloadedFiles");
+  downloadedFiles.appendChild(downloadLink);
+
+  downloadLink.addEventListener("click", () => {
+    downloadLink.click();
+  });
 });
