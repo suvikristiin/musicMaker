@@ -226,8 +226,9 @@ const getSampleDuration = async (src) => {
 
 const filterSamplesByCategory = (category) => {
   const dropdown = document.getElementById("select");
+  const options = dropdown.querySelectorAll("option");
 
-  dropdown.forEach((option) => {
+  options.forEach((option) => {
     if (option.value === category) {
       option.selected = true;
     } else {
@@ -256,7 +257,9 @@ const addSampleFilterDropdown = () => {
     "Classical",
     "Input files",
   ];
+
   const dropdown = document.createElement("select");
+  dropdown.setAttribute("id", "select");
   const allOption = document.createElement("option");
   allOption.innerText = "All";
   allOption.value = "All";
@@ -270,6 +273,7 @@ const addSampleFilterDropdown = () => {
   });
 
   dropdown.addEventListener("change", (e) => {
+    console.log(e.target.value);
     filterSamplesByCategory(e.target.value);
   });
 
@@ -559,7 +563,9 @@ const changeSampleCategory = (sampleElement) => {
 
     categoryOption.addEventListener("click", () => {
       const allCategories = categoryDiv.querySelectorAll("span");
-      allCategories.forEach(category => category.classList.remove("selected-category"));
+      allCategories.forEach((category) =>
+        category.classList.remove("selected-category")
+      );
       categoryOption.classList.add("selected-category");
     });
 
