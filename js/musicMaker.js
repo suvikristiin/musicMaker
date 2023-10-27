@@ -45,7 +45,7 @@ const createTrack = (tracksDiv, tracks) => {
 
   trackVolumeSlider.setAttribute("type", "range");
   trackVolumeSlider.setAttribute("min", "0");
-  trackVolumeSlider.setAttribute("max", "100");
+  trackVolumeSlider.setAttribute("max", "50");
   trackVolumeSlider.setAttribute("step", "5");
   trackVolumeSlider.setAttribute("class", "slider");
   trackVolumeSlider.setAttribute("id", "trackVol" + index);
@@ -131,7 +131,7 @@ const createTrack = (tracksDiv, tracks) => {
     const instrumentVolSlider = document.createElement("input");
     instrumentVolSlider.setAttribute("type", "range");
     instrumentVolSlider.setAttribute("min", "0");
-    instrumentVolSlider.setAttribute("max", "100");
+    instrumentVolSlider.setAttribute("max", "50");
     instrumentVolSlider.setAttribute("step", "5");
     instrumentVolSlider.setAttribute("class", "sliderInstrument");
     instrumentVolSlider.setAttribute("id", "instrumentVol" + clonedId);
@@ -429,6 +429,8 @@ const playTrack = (track, index) => {
     audio.play();
   });
 
+  console.log(audio.volume);
+
   checkTrackInterval = setInterval(() => {
     if (!track[i] || !track[i].src) {
       if (audio) {
@@ -694,14 +696,17 @@ downloadButton.addEventListener("click", async () => {
   const mp3DataRight = new Int16Array(rightAudioData.length);
 
   for (let i = 0; i < leftAudioData.length; i++) {
-    mp3DataLeft[i] = leftAudioData[i] * 32767;
+    mp3DataLeft[i] = Math.min(
+      32767,
+      Math.max(-32768, leftAudioData[i] * 32767)
+    );
   }
 
   for (let i = 0; i < rightAudioData.length; i++) {
-    mp3DataRight[i] = rightAudioData[i] * 32767;
+    Math.min(32767, Math.max(-32768, rightAudioData[i] * 32767));
   }
 
-  const mp3encoder = new lamejs.Mp3Encoder(2, combinedBuffer.sampleRate, 128);
+  const mp3encoder = new lamejs.Mp3Encoder(2, combinedBuffer.sampleRate, 192);
   const mp3Buffer = [];
 
   for (let i = 0; i < mp3DataLeft.length; i += 1152) {
