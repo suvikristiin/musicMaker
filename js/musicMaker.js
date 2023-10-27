@@ -354,6 +354,8 @@ const playTrack = (track, index) => {
   const downloadButton = document.getElementById("download");
 
   const loopCheckbox = document.getElementById("loopCheckbox" + index);
+  const playButton = document.getElementById("play");
+  const pauseButton = document.getElementById("pause");
 
   const shouldLoop = loopCheckbox.checked;
   console.log(shouldLoop);
@@ -421,16 +423,6 @@ const playTrack = (track, index) => {
 
   audio.addEventListener("ended", playNextTrack, shouldLoop);
 
-  const volume = volumeTrack.value / 100 + track[i].volume / 100;
-  audio.volume = volume > 1 ? 1 : volume;
-  audio.src = track[i].src;
-
-  audio.addEventListener("loadedmetadata", () => {
-    audio.play();
-  });
-
-  console.log(audio.volume);
-
   checkTrackInterval = setInterval(() => {
     if (!track[i] || !track[i].src) {
       if (audio) {
@@ -440,6 +432,18 @@ const playTrack = (track, index) => {
       playNextTrack();
     }
   }, 100);
+
+  if (track[i] && track[i].src && track[i].volume) {
+    audio.src = track[i].src;
+    const volume = volumeTrack.value / 100 + track[i].volume / 100;
+    audio.volume = volume > 1 ? 1 : volume;
+  }
+
+  audio.addEventListener("loadedmetadata", () => {
+    audio.play();
+  });
+
+  console.log(audio.volume);
 
   volumeTrack.addEventListener("input", () => {
     const updateVolume = volumeTrack.value / 100 + track[i].volume / 100;
@@ -466,8 +470,6 @@ const playTrack = (track, index) => {
     }
   }
 
-  const playButton = document.getElementById("play");
-
   playButton.addEventListener("click", () => {
     if (isPaused) {
       if (audio.dataset.currentTime !== 0) {
@@ -493,7 +495,6 @@ const playTrack = (track, index) => {
 
   playButton.addEventListener("click", playButtonClickHandler);
 
-  const pauseButton = document.getElementById("pause");
   pauseButton.addEventListener("click", () => {
     audio.pause();
     isPaused = true;
