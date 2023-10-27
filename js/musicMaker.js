@@ -112,7 +112,7 @@ const createTrack = (tracksDiv, tracks) => {
     const sampleId = e.dataTransfer.getData("text");
     const originalSample = document.getElementById(sampleId);
     const clonedSample = originalSample.cloneNode(true);
-
+    clonedSample.classList.replace("sampleElement", "clonedSample");
     const audio = new Audio();
     audio.src = originalSample.src;
 
