@@ -171,10 +171,12 @@ h3 {
   align-items: center;
   justify-items: center;
   padding-right: 17px;
+  flex-grow: 0;
+  flex-shrink: 0;
 }
 
 .dropped #text {
-  padding-top: 10px;
+  padding-top: 15px;
 }
 
 #allTracks > div {
@@ -189,6 +191,7 @@ h3 {
 
 .trackDiv {
   display: flex;
+  overflow-x: auto;
 }
 
 #addTrack {
@@ -254,4 +257,55 @@ input[type="range"]::-webkit-slider-thumb {
   height: 1rem;
   width: 0.5rem;
   border-radius: 10px;
+}
+
+@media (max-width: 800px) {
+  #pause {
+    margin-top: 40px;
+  }
+
+  #play {
+    margin-top: 40px;
+  }
+
+  #reset {
+    margin-top: 40px;
+  }
+
+  #download {
+    margin-top: 40px;
+  }
+
+  #sampleControls {
+    width: 75%;
+  }
+
+  #allTracks {
+    display: grid;
+    grid-template-columns: 100px auto 50px;
+  }
+
+  #downloadedFiles {
+    width: 40%;
+  }
+}
+
+@media (max-width: 550px) {
+  #sampleControls {
+    width: 85%;
+  }
+
+  #downloadedFiles {
+    width: 70%;
+  }
+
+  #allTracks {
+    display: grid;
+    grid-template-columns: 75px auto 40px;
+  }
+
+  h3 {
+    font-size: 14px;
+    color: #c8c8c8;
+  }
 }
