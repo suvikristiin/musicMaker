@@ -1,6 +1,3 @@
-:root {
-  --main-color: #ffa600;
-}
 
 body {
   background-color: #1b1b1b;
@@ -41,6 +38,7 @@ select {
   min-height: 75px;
   margin-top: 30px;
 }
+
 .checkboxLabel {
   color: #c8c8c8;
 }

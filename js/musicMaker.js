@@ -27,12 +27,20 @@ const createSample = (sample, sampleCollections) => {
 const createTrackAudioElement = (index) => {
   const audio = new Audio();
   trackAudioElements[index] = audio;
-  console.log("tracksAudios", trackAudioElements);
+};
+
+const updateTrackHeaderText = (tracksDiv) => {
+  const trackSetupDivs = Array.from(
+    tracksDiv.getElementsByClassName("setUpDiv")
+  );
+
+  trackSetupDivs.forEach((trackSetupDiv, index) => {
+    const trackDivHeader = trackSetupDiv.querySelector("h3");
+    trackDivHeader.innerText = "Track " + (index + 1);
+  });
 };
 
 const createTrack = (tracksDiv, tracks) => {
-  console.log(tracks);
-
   const cloneCounts = {};
   const index = tracksDiv.children.length / 3;
   createTrackAudioElement(index);
@@ -64,17 +72,6 @@ const createTrack = (tracksDiv, tracks) => {
 
   const trackDivHeader = document.createElement("h3");
 
-  const updateTrackHeaderText = (tracksDiv) => {
-    const trackSetupDivs = Array.from(
-      tracksDiv.getElementsByClassName("setUpDiv")
-    );
-
-    trackSetupDivs.forEach((trackSetupDiv, index) => {
-      const trackDivHeader = trackSetupDiv.querySelector("h3");
-      trackDivHeader.innerText = "Track " + (index + 1);
-    });
-  };
-
   trackSetupDiv.appendChild(trackDivHeader);
   trackSetupDiv.appendChild(trackVolumeSlider);
   tracksDiv.appendChild(trackSetupDiv);
@@ -94,7 +91,6 @@ const createTrack = (tracksDiv, tracks) => {
     tracksDiv.removeChild(trackSetupDiv);
     tracksDiv.removeChild(removeTrackButton);
     tracks.splice(index, 1);
-    console.log(tracks);
     updateTrackHeaderText(tracksDiv);
   });
 
@@ -154,15 +150,11 @@ const createTrack = (tracksDiv, tracks) => {
       volume: instrumentVolSlider.value,
     });
 
-    console.log("tracks", tracks);
-
     instrumentVolSlider.addEventListener("input", () => {
       tracks[trackIndex][clonedSampleIndex].volume = instrumentVolSlider.value;
-      console.log(tracks);
     });
 
     clonedSample.setAttribute("draggable", false);
-    console.log("clonedId", clonedId);
 
     const removeClonedSampleButton =
       clonedSample.querySelector(".removeSample");
@@ -171,8 +163,7 @@ const createTrack = (tracksDiv, tracks) => {
       const removeSampleIndex = clonedSample.getAttribute(
         "data-cloned-sample-index"
       );
-      console.log(clonedSampleIndex);
-      console.log(clonedSample);
+
       trackDiv.removeChild(clonedSample);
       tracks[trackIndex][clonedSampleIndex] = {};
 
@@ -183,8 +174,6 @@ const createTrack = (tracksDiv, tracks) => {
           clonedSample.getAttribute("data-cloned-sample-index")
         );
 
-        console.log(currentDataIndex);
-
         if (currentDataIndex >= removeSampleIndex) {
           clonedSample.setAttribute(
             "data-cloned-sample-index",
@@ -194,12 +183,10 @@ const createTrack = (tracksDiv, tracks) => {
       });
 
       clonedSampleCount--;
-      console.log(clonedSampleCount);
 
       const noClonedSamplesLeft = tracks.every((track) =>
         track.every((sample) => Object.keys(sample).length === 0)
       );
-      console.log(noClonedSamplesLeft);
 
       if (noClonedSamplesLeft) {
         downloadButton.style.visibility = "hidden";
@@ -207,8 +194,6 @@ const createTrack = (tracksDiv, tracks) => {
           track.length = 0;
         });
       }
-
-      console.log(tracks);
     });
   });
 };
@@ -237,9 +222,7 @@ const filterSamplesByCategory = (category) => {
   });
 
   const samples = document.querySelectorAll(".sampleElement");
-  console.log(samples);
   samples.forEach((sample) => {
-    console.log(sample.dataset.category);
     if (sample.dataset.category !== category && category !== "All") {
       sample.style.display = "none";
     } else {
@@ -273,7 +256,6 @@ const addSampleFilterDropdown = () => {
   });
 
   dropdown.addEventListener("change", (e) => {
-    console.log(e.target.value);
     filterSamplesByCategory(e.target.value);
   });
 
@@ -304,15 +286,20 @@ const addInitialSamples = () => {
   });
 
   const uploadSampleButton = document.getElementById("uploadSample");
+
   uploadSampleButton.addEventListener("click", () => {
     const file = document.getElementById("input-sample").files[0];
     let audioSrc = "";
+
     if (!file) return;
+
     audioSrc = URL.createObjectURL(file);
     let sampleName = file.name;
+
     if (sampleName.length > 15) {
       sampleName = sampleName.substring(0, 15);
     }
+
     let sample = { src: audioSrc, name: sampleName, category: "Input files" };
     samples.push(sample);
     createSample(sample, sampleCollections);
@@ -338,7 +325,6 @@ const addInitialTracks = (tracks) => {
 
 const playSong = (tracks) => {
   tracks.forEach((track, i) => {
-    console.log("track play", track);
     if (track.length > 0) {
       playTrack(track, i);
     }
@@ -358,7 +344,6 @@ const playTrack = (track, index) => {
   const pauseButton = document.getElementById("pause");
 
   const shouldLoop = loopCheckbox.checked;
-  console.log(shouldLoop);
 
   let i = 0;
   let isPaused = false;
@@ -372,7 +357,6 @@ const playTrack = (track, index) => {
       i = ++i < track.length ? i : 0;
 
       if (i == 0 && !shouldLoop) {
-        console.log("moi");
         audio.remove();
         initialIsPaused = true;
         clearInterval(checkTrackInterval);
@@ -391,7 +375,6 @@ const playTrack = (track, index) => {
       }
 
       if (i == 0 && emptyTrack) {
-        console.log("Kaikki kappaleet soitettu");
         audio.remove();
         initialIsPaused = true;
         clearInterval(checkTrackInterval);
@@ -403,13 +386,7 @@ const playTrack = (track, index) => {
         });
         return;
       }
-
-      console.log("loop", i);
     }
-
-    console.log(i);
-
-    console.log(track.length);
 
     const volume = volumeTrack.value / 100 + track[i].volume / 100;
     audio.volume = volume > 1 ? 1 : volume;
@@ -428,7 +405,6 @@ const playTrack = (track, index) => {
       if (audio) {
         audio.pause();
       }
-      console.log("next");
       playNextTrack();
     }
   }, 100);
@@ -443,8 +419,6 @@ const playTrack = (track, index) => {
     audio.play();
   });
 
-  console.log(audio.volume);
-
   volumeTrack.addEventListener("input", () => {
     const updateVolume = volumeTrack.value / 100 + track[i].volume / 100;
     audio.volume = updateVolume > 1 ? 1 : updateVolume;
@@ -458,7 +432,6 @@ const playTrack = (track, index) => {
     const volumePerInstrument = document.querySelectorAll(
       "[id^='instrumentVol'][id$='" + index + instrumentIndex + "']"
     );
-    console.log(volumePerInstrument);
 
     if (volumePerInstrument.length > 0) {
       volumePerInstrument[0].addEventListener("input", () => {
@@ -474,8 +447,8 @@ const playTrack = (track, index) => {
     if (isPaused) {
       if (audio.dataset.currentTime !== 0) {
         audio.currentTime = parseFloat(audio.dataset.currentTime);
-        console.log(audio.currentTime);
       }
+
       audio.play();
       playButton.removeEventListener("click", null);
     }
@@ -485,7 +458,6 @@ const playTrack = (track, index) => {
     if (isPaused) {
       if (audio.dataset.currentTime !== 0) {
         audio.currentTime = parseFloat(audio.dataset.currentTime);
-        console.log(audio.currentTime);
         isPaused = false;
       }
       audio.play();
@@ -499,46 +471,10 @@ const playTrack = (track, index) => {
     audio.pause();
     isPaused = true;
     audio.dataset.currentTime = audio.currentTime;
-    console.log(audio.currentTime);
 
     playButton.addEventListener("click", playButtonClickHandler);
   });
 };
-
-const tracks = [];
-tracks.push([]);
-tracks.push([]);
-let trackAudioElements = [];
-const removeClonedSampleButtons = [];
-
-let initialIsPaused = true;
-
-addInitialSamples();
-addInitialTracks(tracks);
-
-const playButton = document.getElementById("play");
-
-if (initialIsPaused) {
-  playButtonClickHandler = () => {
-    playSong(tracks);
-    initialIsPaused = false;
-    playButton.removeEventListener("click", playButtonClickHandler);
-  };
-
-  playButton.addEventListener("click", playButtonClickHandler);
-}
-
-const addNewTrackButton = document.getElementById("addTrack");
-addNewTrackButton.addEventListener("click", () => {
-  const tracksDiv = document.getElementById("allTracks");
-  tracks.push([]);
-  createTrack(document.getElementById("allTracks"), tracks);
-});
-
-const reset = document.getElementById("reset");
-reset.addEventListener("click", () => {
-  location.reload();
-});
 
 const changeSampleCategory = (sampleElement) => {
   const categories = [
@@ -552,12 +488,12 @@ const changeSampleCategory = (sampleElement) => {
 
   const categoryDiv = document.createElement("div");
   const changeCategory = document.createElement("h3");
-  console.log(sampleElement.textContent);
   changeCategory.innerHTML = "Change category: " + sampleElement.innerHTML;
   categoryDiv.appendChild(changeCategory);
   const sampleControls = document.getElementById("sampleCollections");
   categoryDiv.setAttribute("id", "categoriesDiv");
   sampleControls.appendChild(categoryDiv);
+
   categories.forEach((category) => {
     const categoryOption = document.createElement("span");
     categoryOption.innerText = category;
@@ -569,12 +505,13 @@ const changeSampleCategory = (sampleElement) => {
       allCategories.forEach((category) =>
         category.classList.remove("selected-category")
       );
+
       categoryOption.classList.add("selected-category");
     });
 
     categoryOption.addEventListener("dblclick", () => {
       sampleElement.setAttribute("data-category", category);
-      categoryDiv.remove(); // poistaa kategoriavaihtoehdot
+      categoryDiv.remove();
     });
 
     categoryDiv.appendChild(categoryOption);
@@ -589,6 +526,7 @@ const changeSampleCategory = (sampleElement) => {
       sampleElement.setAttribute("data-category", selectedCategory.innerText);
       filterSamplesByCategory(selectedCategory.innerText);
     }
+
     categoryDiv.remove();
   });
 
@@ -603,22 +541,10 @@ const changeSampleCategory = (sampleElement) => {
   categoryDiv.appendChild(deleteButton);
 };
 
-const sampleCollections = document.getElementById("sampleCollections");
-
-const sampleElements = sampleCollections.querySelectorAll(".sampleElement");
-sampleElements.forEach((sample) => {
-  sample.addEventListener("click", (e) => {
-    if (e.target === sample) {
-      changeSampleCategory(sample);
-    }
-  });
-});
-
 const createAudioBuffer = async (src, audioContext) => {
   const response = await fetch(src);
-
   const arrayBuffer = await response.arrayBuffer();
-  console.log(arrayBuffer);
+
   return await audioContext.decodeAudioData(arrayBuffer);
 };
 
@@ -684,6 +610,52 @@ const combineTracks = async (audioContext) => {
 
   return combinedBuffer;
 };
+
+const tracks = [];
+tracks.push([]);
+tracks.push([]);
+let trackAudioElements = [];
+const removeClonedSampleButtons = [];
+
+let initialIsPaused = true;
+
+addInitialSamples();
+addInitialTracks(tracks);
+
+const playButton = document.getElementById("play");
+
+if (initialIsPaused) {
+  playButtonClickHandler = () => {
+    playSong(tracks);
+    initialIsPaused = false;
+    playButton.removeEventListener("click", playButtonClickHandler);
+  };
+
+  playButton.addEventListener("click", playButtonClickHandler);
+}
+
+const addNewTrackButton = document.getElementById("addTrack");
+addNewTrackButton.addEventListener("click", () => {
+  const tracksDiv = document.getElementById("allTracks");
+  tracks.push([]);
+  createTrack(document.getElementById("allTracks"), tracks);
+});
+
+const reset = document.getElementById("reset");
+reset.addEventListener("click", () => {
+  location.reload();
+});
+
+const sampleCollections = document.getElementById("sampleCollections");
+
+const sampleElements = sampleCollections.querySelectorAll(".sampleElement");
+sampleElements.forEach((sample) => {
+  sample.addEventListener("click", (e) => {
+    if (e.target === sample) {
+      changeSampleCategory(sample);
+    }
+  });
+});
 
 const downloadButton = document.getElementById("download");
 
